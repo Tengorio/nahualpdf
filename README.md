@@ -1,14 +1,24 @@
-# miniPDF v2
+# NahualPDF
 
-Herramientas de PDF para expedientes de Secihti — equivalente local de iLovePDF,
-corriendo en la red local (los archivos **nunca salen a internet**). Migración de
-la versión Streamlit a **React (frontend) + FastAPI (backend)** para una UX más
-versátil (drag & drop, miniaturas, estados sin recargar, descarga en .zip).
+**Herramienta de transformación de expedientes y documentos en PDF.** Dividir,
+unir, comprimir y organizar — equivalente local de iLovePDF, corriendo en la red
+local de Secihti: los archivos **nunca salen a internet**.
+
+El nombre viene del *nahual*, el que cambia de forma; que es justo lo que hace
+con los documentos.
+
+## Historia
+
+Nació como **miniPDF** (el "mini" venía de *ministración*), una app de Streamlit
+para partir y unir expedientes antes de subirlos a las plataformas de Hacienda.
+Al resultar útil para otras áreas más allá de ministración, se reescribió como
+aplicación propia en **React + FastAPI** y se renombró a NahualPDF. La historia
+del Streamlit original vive en este mismo repositorio.
 
 ## Estructura
 
 ```
-minipdf-v2/
+nahualpdf/
 ├─ backend/     FastAPI · lógica de PDF en app/pdf_ops.py (sin Streamlit)
 └─ frontend/    React + Vite + TypeScript
 ```
@@ -71,15 +81,15 @@ usuario, que es lo que permite correr sin sesión abierta):
 bash deploy/instalar.sh
 ```
 
-Ese script compila el frontend, instala `deploy/minipdf.service` en
+Ese script compila el frontend, instala `deploy/nahualpdf.service` en
 `~/.config/systemd/user/`, lo habilita y lo reinicia. **Es también la forma de
 publicar cambios**: vuelve a correrlo después de tocar el código.
 
 ```bash
-systemctl --user status minipdf      # cómo va
-systemctl --user restart minipdf     # reiniciar
-systemctl --user stop minipdf        # bajarlo
-tail -f deploy/minipdf.log           # registro
+systemctl --user status nahualpdf      # cómo va
+systemctl --user restart nahualpdf     # reiniciar
+systemctl --user stop nahualpdf        # bajarlo
+tail -f deploy/nahualpdf.log           # registro
 ```
 
 El servicio tiene `Restart=always`, así que si el proceso muere se levanta solo
@@ -102,14 +112,14 @@ en `:8000`; Vite lo levanta solo si no está corriendo:
 ```bash
 cd frontend
 python e2e/fixtures/generar_fixtures.py   # la primera vez: PDFs de prueba
-npx playwright test e2e/minipdf.spec.ts
+npx playwright test e2e/nahualpdf.spec.ts
 ```
 
 Para probar contra el servicio instalado en lugar del servidor de desarrollo
 (es decir, sobre el build que realmente usan los compañeros):
 
 ```bash
-MINIPDF_URL=http://localhost:8000 npx playwright test e2e/minipdf.spec.ts
+NAHUALPDF_URL=http://localhost:8000 npx playwright test e2e/nahualpdf.spec.ts
 ```
 
 Para revisar la apariencia a ojo, `npx playwright test e2e/capturas.spec.ts`

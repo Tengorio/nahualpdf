@@ -7,9 +7,9 @@ import { defineConfig } from '@playwright/test'
  * Por defecto apunta al servidor de desarrollo de Vite (:5173) y requiere el
  * backend arriba en :8000. Para probar contra el servicio instalado, que sirve
  * el build compilado desde FastAPI:
- *   MINIPDF_URL=http://localhost:8000 npx playwright test e2e/minipdf.spec.ts
+ *   NAHUALPDF_URL=http://localhost:8000 npx playwright test e2e/nahualpdf.spec.ts
  */
-const BASE_URL = process.env.MINIPDF_URL ?? 'http://localhost:5173'
+const BASE_URL = process.env.NAHUALPDF_URL ?? 'http://localhost:5173'
 const USA_VITE = BASE_URL.includes('5173')
 
 export default defineConfig({

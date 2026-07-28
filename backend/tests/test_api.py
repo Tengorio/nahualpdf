@@ -1,5 +1,5 @@
 """
-Pruebas de la API de miniPDF v2.
+Pruebas de la API de NahualPDF.
 
 Ejercitan los cuatro módulos (info, dividir, comprimir, unir, organizar) contra
 PDFs generados al vuelo, sin depender de archivos del expediente real.

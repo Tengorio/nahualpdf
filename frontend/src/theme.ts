@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 export type Theme = 'light' | 'dark'
-const KEY = 'minipdf-theme'
+const KEY = 'nahualpdf-theme'
 
 /**
  * Tema de la app. Por defecto **claro** (aunque el SO esté en oscuro), salvo

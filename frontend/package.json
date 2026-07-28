@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "nahualpdf-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -27,5 +27,6 @@
     "oxlint": "^1.71.0",
     "typescript": "~6.0.2",
     "vite": "^8.1.1"
-  }
+  },
+  "description": "Interfaz de NahualPDF: herramienta de transformaci\u00f3n de expedientes y documentos en PDF."
 }

@@ -21,7 +21,7 @@ def texto(nombre: str, paginas: int, etiqueta: str) -> None:
         c.setFont("Helvetica-Bold", 40)
         c.drawString(72, 640, f"{etiqueta} {i}")
         c.setFont("Helvetica", 16)
-        c.drawString(72, 590, "Documento de prueba de miniPDF v2.")
+        c.drawString(72, 590, "Documento de prueba de NahualPDF.")
         c.showPage()
     c.save()
 

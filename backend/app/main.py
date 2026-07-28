@@ -1,5 +1,5 @@
 """
-API de miniPDF v2 (FastAPI).
+API de NahualPDF (FastAPI).
 
 Expone la lógica de `pdf_ops` como endpoints HTTP para el frontend React.
 Corre en local; los archivos se procesan en memoria y no se persisten.
@@ -19,7 +19,7 @@ from pydantic import BaseModel
 
 from . import pdf_ops
 
-app = FastAPI(title="miniPDF API", version="2.0.0")
+app = FastAPI(title="NahualPDF API", version="2.0.0")
 
 # En desarrollo el frontend Vite corre en localhost:5173.
 app.add_middleware(
@@ -118,7 +118,7 @@ def _serialize_parts(raw_parts: list[dict], original: str, project_key: str | No
 # --------------------------------------------------------------------------- #
 @app.get("/api/health")
 def health() -> dict:
-    return {"status": "ok", "service": "minipdf-api"}
+    return {"status": "ok", "service": "nahualpdf-api"}
 
 
 @app.post("/api/pdf/info", response_model=PdfInfo)

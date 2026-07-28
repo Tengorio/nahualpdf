@@ -21,10 +21,10 @@ export default function App() {
   return (
     <div className="app">
       <div className="brand">
-        <div className="glyph">m</div>
+        <div className="glyph">n</div>
         <div>
-          <div className="word">mini<b>PDF</b></div>
-          <div className="sub">Herramientas de expedientes</div>
+          <div className="word">Nahual<b>PDF</b></div>
+          <div className="sub">Transforma expedientes y documentos</div>
         </div>
       </div>
 
@@ -49,7 +49,7 @@ export default function App() {
           </button>
         ))}
         <div className="spacer" />
-        <div className="themehint">miniPDF v2 · desarrollo local</div>
+        <div className="themehint">NahualPDF · Secihti</div>
       </nav>
 
       <main className="main">
@@ -58,7 +58,7 @@ export default function App() {
         {tool === 'comprimir' && <ComprimirPanel />}
         {tool === 'organizar' && <OrganizarPanel />}
         <div className="footnote">
-          miniPDF v2 — procesamiento 100% en el servidor local. Ningún archivo sale a internet.
+          NahualPDF — procesamiento 100% en el servidor local. Ningún archivo sale a internet.
         </div>
       </main>
     </div>

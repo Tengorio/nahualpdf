@@ -1,5 +1,5 @@
 """
-Lógica de manipulación de PDF para miniPDF v2.
+Lógica de manipulación de PDF para NahualPDF.
 
 Port de `utilities_minipdf.py` + las funciones de división aprobadas en la
 versión Streamlit, SIN dependencia de Streamlit: aquí no hay `st.*`. Las

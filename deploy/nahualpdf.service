@@ -1,12 +1,12 @@
 [Unit]
-Description=miniPDF v2 (API + frontend compilado)
-Documentation=file:///home/cb2/japt/minipdf-v2/README.md
+Description=NahualPDF — transformación de expedientes y documentos en PDF
+Documentation=file:///home/cb2/japt/nahualpdf/README.md
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/cb2/japt/minipdf-v2/backend
+WorkingDirectory=/home/cb2/japt/nahualpdf/backend
 # Se invoca el uvicorn del ambiente conda `mini` por ruta absoluta: systemd no
 # carga el perfil del shell, así que `conda activate` no existe aquí.
 ExecStart=/home/cb2/miniconda3/envs/mini/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
@@ -15,8 +15,8 @@ RestartSec=5
 # Los archivos se procesan en memoria; si algo se desborda, que reinicie limpio
 # en vez de tirar la máquina.
 MemoryMax=4G
-StandardOutput=append:/home/cb2/japt/minipdf-v2/deploy/minipdf.log
-StandardError=append:/home/cb2/japt/minipdf-v2/deploy/minipdf.log
+StandardOutput=append:/home/cb2/japt/nahualpdf/deploy/nahualpdf.log
+StandardError=append:/home/cb2/japt/nahualpdf/deploy/nahualpdf.log
 
 [Install]
 WantedBy=default.target

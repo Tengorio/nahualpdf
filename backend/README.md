@@ -1,4 +1,4 @@
-# miniPDF v2 — Backend (FastAPI)
+# NahualPDF — Backend (FastAPI)
 
 API local que expone la lógica de manipulación de PDF. Los archivos se procesan
 en memoria; nada se persiste ni sale a internet.
