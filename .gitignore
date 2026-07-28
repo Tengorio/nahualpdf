@@ -21,3 +21,6 @@ frontend/e2e/fixtures/*.pdf
 .DS_Store
 nohup.out
 *.log
+
+# Registro del servicio
+deploy/*.log

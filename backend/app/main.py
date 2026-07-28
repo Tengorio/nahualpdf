@@ -10,8 +10,11 @@ import base64
 import json
 import os
 
+from pathlib import Path
+
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from . import pdf_ops
@@ -339,3 +342,16 @@ async def organize(
         files, sequence, max_size_mb, dpi, quality, preserve_text,
         suffix="_organizado", fallback_name="documento_organizado",
     )
+
+
+# --------------------------------------------------------------------------- #
+# Frontend compilado
+#
+# En producción (el servicio systemd) este mismo proceso sirve el build de
+# React, así no hay que mantener Vite arriba: todo vive en un puerto.
+# Se monta AL FINAL para no tapar las rutas /api. Si no hay build, la API
+# funciona igual y el frontend se sirve con `npm run dev` en :5173.
+# --------------------------------------------------------------------------- #
+DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+if DIST.is_dir():
+    app.mount("/", StaticFiles(directory=DIST, html=True), name="frontend")

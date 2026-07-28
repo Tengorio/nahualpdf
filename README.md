@@ -53,6 +53,39 @@ Vite redirige `/api` → `localhost:8000`, así que basta abrir
 - [x] Pruebas automatizadas de API y de interfaz (ver abajo)
 - [ ] Descarga por streaming del lado servidor (hoy base64 en JSON; ok para archivos chicos)
 
+## Servicio permanente (así lo usan los compañeros)
+
+En el servidor corre como servicio de usuario de systemd: queda arriba al
+cerrar la sesión SSH y **se levanta solo al reiniciar el equipo**. Un solo
+proceso sirve la API y el frontend compilado, así que no hace falta mantener
+Vite corriendo.
+
+```
+http://172.16.26.16:8000        ← la dirección para compartir
+```
+
+Instalar o reinstalar (no necesita sudo; `linger` ya está habilitado para el
+usuario, que es lo que permite correr sin sesión abierta):
+
+```bash
+bash deploy/instalar.sh
+```
+
+Ese script compila el frontend, instala `deploy/minipdf.service` en
+`~/.config/systemd/user/`, lo habilita y lo reinicia. **Es también la forma de
+publicar cambios**: vuelve a correrlo después de tocar el código.
+
+```bash
+systemctl --user status minipdf      # cómo va
+systemctl --user restart minipdf     # reiniciar
+systemctl --user stop minipdf        # bajarlo
+tail -f deploy/minipdf.log           # registro
+```
+
+El servicio tiene `Restart=always`, así que si el proceso muere se levanta solo
+a los 5 segundos. Para desarrollo sigue disponible `npm run dev` en :5173, que
+convive con el servicio sin chocar de puerto.
+
 ## Pruebas
 
 **Backend** — 18 pruebas de la API, con PDFs generados al vuelo:
@@ -70,6 +103,13 @@ en `:8000`; Vite lo levanta solo si no está corriendo:
 cd frontend
 python e2e/fixtures/generar_fixtures.py   # la primera vez: PDFs de prueba
 npx playwright test e2e/minipdf.spec.ts
+```
+
+Para probar contra el servicio instalado en lugar del servidor de desarrollo
+(es decir, sobre el build que realmente usan los compañeros):
+
+```bash
+MINIPDF_URL=http://localhost:8000 npx playwright test e2e/minipdf.spec.ts
 ```
 
 Para revisar la apariencia a ojo, `npx playwright test e2e/capturas.spec.ts`
