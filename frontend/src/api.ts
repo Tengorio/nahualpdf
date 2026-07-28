@@ -81,11 +81,10 @@ export async function merge(
   return handle<MergeResult>(await fetch('/api/merge', { method: 'POST', body: form }))
 }
 
-export async function mergePages(
-  files: File[],
-  sequence: [number, number][],
-  p: MergeParams,
-): Promise<MergeResult> {
+/** Página del tablero: [índice de archivo, número de página, giro en grados]. */
+export type PageRef = [number, number] | [number, number, number]
+
+function pageSequenceForm(files: File[], sequence: PageRef[], p: MergeParams): FormData {
   const form = new FormData()
   files.forEach((f) => form.append('files', f))
   form.append('sequence', JSON.stringify(sequence))
@@ -93,7 +92,26 @@ export async function mergePages(
   form.append('dpi', String(p.dpi ?? 150))
   form.append('quality', String(p.quality ?? 80))
   form.append('preserve_text', String(p.preserveText ?? true))
-  return handle<MergeResult>(await fetch('/api/merge/pages', { method: 'POST', body: form }))
+  return form
+}
+
+export async function mergePages(
+  files: File[],
+  sequence: PageRef[],
+  p: MergeParams,
+): Promise<MergeResult> {
+  const body = pageSequenceForm(files, sequence, p)
+  return handle<MergeResult>(await fetch('/api/merge/pages', { method: 'POST', body }))
+}
+
+/** Reordenar / girar / eliminar páginas de uno o varios documentos. */
+export async function organize(
+  files: File[],
+  sequence: PageRef[],
+  p: MergeParams,
+): Promise<MergeResult> {
+  const body = pageSequenceForm(files, sequence, p)
+  return handle<MergeResult>(await fetch('/api/organize', { method: 'POST', body }))
 }
 
 /** base64 (de la API) -> Uint8Array. */

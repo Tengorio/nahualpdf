@@ -228,12 +228,27 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(
 .iconbtn.danger:hover { border-color: var(--crit); color: var(--crit); }
 .iconbtn svg { width: 15px; height: 15px; }
 .rcard .rmeta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.rcard .rmeta .nm { font-family: var(--mono); font-size: 12.5px; overflow: hidden; }
+.rcard .rmeta { min-width: 0; }
+.rcard .rmeta .nm { flex: 1; font-family: var(--mono); font-size: 12.5px; min-width: 0; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; }
 .rcard .rmeta .nm small { display: block; color: var(--ink-3); font-size: 11px; }
 
-/* Tablero de páginas (Unir) */
-.board-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-.pageboard { display: grid; grid-template-columns: repeat(auto-fill, minmax(142px, 1fr)); gap: 12px; }
+/* Tablero de páginas (Unir / Organizar) */
+.board-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.btngroup { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.btn-sm { padding: 6px 11px; font-size: 12.5px; border-radius: 8px; }
+.btn-sm svg { width: 13px; height: 13px; }
+.seg-sm button { padding: 5px 10px; font-size: 12px; min-width: 30px; }
+.rowflex.wrap { flex-wrap: wrap; }
+.boardhints { font-size: 12px; color: var(--ink-3); margin: 0 0 14px; }
+.boardhints b { color: var(--ink-2); font-weight: 600; }
+
+.pageboard { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--thumb-w, 142px), 1fr)); gap: 12px; }
+.pageboard.sz-sm { --thumb-w: 104px; gap: 9px; }
+.pageboard.sz-md { --thumb-w: 142px; }
+.pageboard.sz-lg { --thumb-w: 200px; gap: 16px; }
+.pageboard.sz-sm .pcard { padding: 7px; gap: 6px; }
+.pageboard.sz-sm .pcard-foot .src { display: none; }
 .pcard {
   --file-color: var(--accent);
   background: var(--surface); border: 1px solid var(--line-2); border-top: 3px solid var(--file-color);
@@ -255,17 +270,14 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(
 .pcard-foot { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 11px; color: var(--ink-2); }
 .pcard-foot .src { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pcard-foot .pg { flex: none; color: var(--ink-3); }
+.thumbwrap { position: relative; }
+.rotbadge { position: absolute; right: 5px; bottom: 5px; font-family: var(--mono); font-size: 10px;
+  padding: 1px 5px; border-radius: 4px; background: var(--surface); color: var(--accent-strong);
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent); box-shadow: var(--shadow); }
+.pv-err { position: absolute; inset: 0; display: grid; place-items: center; font-size: 10.5px; color: var(--ink-3); text-align: center; padding: 6px; }
 .pcard.c0 { --file-color: #0F766E; } .pcard.c1 { --file-color: #B4530B; }
 .pcard.c2 { --file-color: #6D28D9; } .pcard.c3 { --file-color: #0369A1; }
 .pcard.c4 { --file-color: #A21563; } .pcard.c5 { --file-color: #4D7C0F; }
-
-/* Placeholder tools */
-.placeholder { text-align: center; padding: 40px 20px; }
-.placeholder .ring { width: 60px; height: 60px; border-radius: 18px; background: var(--accent-wash);
-  color: var(--accent-strong); display: grid; place-items: center; margin: 0 auto 16px; }
-.placeholder .ring svg { width: 28px; height: 28px; }
-.placeholder h3 { margin: 0 0 6px; font-size: 18px; }
-.placeholder p { margin: 0 auto 18px; color: var(--ink-2); max-width: 46ch; font-size: 14px; }
 
 .spinner { width: 15px; height: 15px; border: 2px solid color-mix(in srgb, var(--on-accent) 40%, transparent);
   border-top-color: var(--on-accent); border-radius: 50%; animation: spin .7s linear infinite; }

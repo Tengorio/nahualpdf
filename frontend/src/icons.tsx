@@ -71,4 +71,14 @@ export const Ic: Record<string, ReactNode> = {
       <path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" />
     </svg>
   ),
+  rotate: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M20 11a8 8 0 1 0-2.3 6.3" /><path d="M20 4v7h-7" />
+    </svg>
+  ),
+  undo: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M4 13a8 8 0 1 1 2.3 6.3" /><path d="M4 20v-7h7" />
+    </svg>
+  ),
 }

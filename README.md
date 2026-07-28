@@ -38,13 +38,39 @@ Vite redirige `/api` → `localhost:8000`, así que basta abrir
 
 ## Estado
 
-- [x] Backend: `pdf/info`, `split/auto` (prioriza calidad), `split/manual`, `compress`, `merge`
+- [x] Backend: `pdf/info`, `split/auto` (prioriza calidad), `split/manual`,
+      `compress`, `merge`, `merge/pages`, `organize`
 - [x] **Dividir** — subir → auto/manual → descargar cada parte o todo en .zip
 - [x] **Comprimir** — a un tamaño objetivo, preservando texto opcionalmente
 - [x] **Unir** — tablero visual de miniaturas: arrastra páginas para reordenar
-      (mouse o teclado, vía @dnd-kit), quita las que no van, compresión opcional
+      (mouse o teclado, vía @dnd-kit), gíralas, quita las que no van, compresión opcional
+- [x] **Organizar** — mismo tablero sobre uno o varios documentos: reordenar,
+      girar (90° por clic o tecla `R`) y eliminar páginas antes de guardar
+- [x] Acciones sobre todo el tablero: incluir/excluir todas, invertir orden,
+      girar todas, quitar giros, y tres densidades de miniatura (S/M/L)
 - [x] Vistas previas de resultados y de páginas (pdf.js en el navegador, lazy)
-- [x] Tema claro/oscuro (claro por defecto, con botón)
-- [ ] **Organizar** — rotar páginas y guardar un solo archivo reorganizado (pendiente;
-      el tablero de Unir ya cubre reordenar/eliminar entre varios archivos)
+- [x] Tema claro/oscuro (claro por defecto, con botón; se recuerda)
+- [x] Pruebas automatizadas de API y de interfaz (ver abajo)
 - [ ] Descarga por streaming del lado servidor (hoy base64 en JSON; ok para archivos chicos)
+
+## Pruebas
+
+**Backend** — 18 pruebas de la API, con PDFs generados al vuelo:
+```bash
+conda activate mini
+cd backend
+pip install -r requirements-dev.txt     # la primera vez
+pytest tests/ -q
+```
+
+**Interfaz** — 14 pruebas end-to-end en Chrome headless, usando el Chrome ya
+instalado en el servidor (no descarga navegadores). Requiere el backend arriba
+en `:8000`; Vite lo levanta solo si no está corriendo:
+```bash
+cd frontend
+python e2e/fixtures/generar_fixtures.py   # la primera vez: PDFs de prueba
+npx playwright test e2e/minipdf.spec.ts
+```
+
+Para revisar la apariencia a ojo, `npx playwright test e2e/capturas.spec.ts`
+deja capturas de cada pantalla en claro y oscuro en `frontend/e2e/capturas/`.

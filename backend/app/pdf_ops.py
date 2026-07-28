@@ -17,6 +17,7 @@ from io import BytesIO
 import img2pdf
 from pdf2image import convert_from_path
 from pypdf import PdfReader, PdfWriter
+from pypdf.generic import NameObject, NumberObject
 
 
 # --------------------------------------------------------------------------- #
@@ -272,7 +273,11 @@ def split_pdf_manual(
             continue
         try:
             chunk = extract_pages(pdf_bytes, page_range)
-        except (ValueError, Exception):
+            # Sintaxis válida pero fuera del documento ("999-1000"): no hay
+            # páginas que entregar, así que cuenta como rango inválido.
+            if count_pages(chunk) == 0:
+                raise ValueError(f"El rango '{page_range}' no selecciona ninguna página.")
+        except Exception:
             parts.append({"range": page_range, "bytes": None, "size_mb": 0.0,
                           "compressed": False, "oversized": False, "error": True})
             continue
@@ -397,7 +402,7 @@ def merge_documents(
 
 def merge_pages(
     files: list[bytes],
-    sequence: list[tuple[int, int]],
+    sequence: list[tuple[int, int] | tuple[int, int, int]],
     max_size_mb: float | None = None,
     dpi: int = 150,
     quality: int = 80,
@@ -405,17 +410,34 @@ def merge_pages(
 ) -> dict:
     """
     Arma un PDF a partir de una secuencia ORDENADA de páginas. Cada elemento de
-    `sequence` es (índice_de_archivo, número_de_página_1based). Permite tomar
-    páginas sueltas de varios archivos en cualquier orden — es lo que alimenta el
-    tablero visual de miniaturas. Ignora referencias fuera de rango.
+    `sequence` es (índice_de_archivo, número_de_página_1based) o, si se quiere
+    girar esa página, (índice_de_archivo, página, rotación en grados). Permite
+    tomar páginas sueltas de varios archivos en cualquier orden — es lo que
+    alimenta el tablero visual de miniaturas. Ignora referencias fuera de rango.
     """
     readers = [PdfReader(BytesIO(b)) for b in files]
+    # Rotación de origen de cada página, guardada antes de tocar nada: una misma
+    # página puede aparecer varias veces con giros distintos, y `/Rotate` se
+    # escribe en el objeto compartido del reader. Trabajando siempre desde el
+    # valor original, el segundo uso no hereda el giro del primero.
+    base_rotations = {
+        (i, p): int(page.get("/Rotate", 0) or 0)
+        for i, reader in enumerate(readers)
+        for p, page in enumerate(reader.pages, start=1)
+    }
+
     writer = PdfWriter()
-    for file_idx, page_no in sequence:
+    for entry in sequence:
+        file_idx, page_no = entry[0], entry[1]
+        rotation = entry[2] if len(entry) > 2 else 0
         if 0 <= file_idx < len(readers):
             reader = readers[file_idx]
             if 1 <= page_no <= len(reader.pages):
-                writer.add_page(reader.pages[page_no - 1])
+                page = reader.pages[page_no - 1]
+                page[NameObject("/Rotate")] = NumberObject(
+                    (base_rotations[(file_idx, page_no)] + rotation) % 360
+                )
+                writer.add_page(page)
 
     num_pages = len(writer.pages)
     if num_pages == 0:

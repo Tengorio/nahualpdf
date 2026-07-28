@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { MergeResult, Stage } from '../types'
-import { b64ToPdfBlob, downloadBlob, mergePages } from '../api'
+import { b64ToPdfBlob, downloadBlob, organize } from '../api'
 import { errMsg, formatSize } from '../util'
 import { toSequence, usePageBoard } from '../usePageBoard'
 import { Dropzone, ErrorNote, SingleResult, SizeLimitControl, Stepper } from '../components/common'
@@ -9,7 +9,7 @@ import { PageBoard } from '../components/PageBoard'
 import { BoardHints, BoardToolbar } from '../components/BoardToolbar'
 import { Ic } from '../icons'
 
-export function UnirPanel() {
+export function OrganizarPanel() {
   const board = usePageBoard()
   const [stage, setStage] = useState<Stage>('empty')
   const [doCompress, setDoCompress] = useState(false)
@@ -25,13 +25,13 @@ export function UnirPanel() {
 
   const run = async () => {
     const sequence = toSequence(board.items)
-    if (sequence.length === 0) { setError('Selecciona al menos una página.'); return }
+    if (sequence.length === 0) { setError('Deja al menos una página incluida.'); return }
     setBusy(true); setError(null)
     try {
-      const res = await mergePages(board.files, sequence, { maxSizeMb: doCompress ? maxSize : 0 })
+      const res = await organize(board.files, sequence, { maxSizeMb: doCompress ? maxSize : 0 })
       setResult(res); setStage('result')
     } catch (e) {
-      setError(errMsg(e, 'Falló la unión.'))
+      setError(errMsg(e, 'No se pudo guardar el documento organizado.'))
     } finally {
       setBusy(false)
     }
@@ -40,14 +40,15 @@ export function UnirPanel() {
   const reset = () => { board.clear(); setStage('empty'); setResult(null); setError(null) }
 
   const includedCount = board.items.filter((it) => it.included).length
+  const rotatedCount = board.items.filter((it) => it.rotation !== 0).length
   const stepN = stage === 'empty' ? 1 : stage === 'loaded' ? 2 : 3
   const shownError = error ?? board.loadError
 
   return (
     <section className="panel">
       <div className="head">
-        <h1>Unir expedientes</h1>
-        <p>Sube varios PDF y arma el documento viendo las páginas: arrástralas para reordenar, gíralas, quita las que no van. No necesitas saber números de página de antemano.</p>
+        <h1>Organizar páginas</h1>
+        <p>Reordena, gira o elimina páginas de un expediente antes de entregarlo. Ves cada página, así que no hay que adivinar números.</p>
       </div>
 
       <Stepper n={stepN} />
@@ -56,9 +57,9 @@ export function UnirPanel() {
       {stage === 'empty' && (
         <Dropzone
           onFiles={load} multiple busy={board.loading}
-          title="Arrastra varios PDF para combinarlos"
-          sub="Verás las páginas de todos como miniaturas para ordenarlas a tu gusto. Todo local; nada sale a internet."
-          cta="Seleccionar archivos"
+          title="Arrastra el PDF que quieres reacomodar"
+          sub="Puedes subir más de uno si quieres armar el expediente con páginas de varios. Todo local; nada sale a internet."
+          cta="Seleccionar PDF"
         />
       )}
 
@@ -87,16 +88,17 @@ export function UnirPanel() {
 
           <div className="actionbar">
             <button className="btn btn-primary btn-lg" disabled={busy || includedCount === 0} onClick={run}>
-              {busy ? <><span className="spinner" /> Uniendo…</> : <>{Ic.unir} Unir {includedCount} página(s)</>}
+              {busy ? <><span className="spinner" /> Guardando…</> : <>{Ic.organizar} Guardar {includedCount} página(s)</>}
             </button>
             <button className="btn btn-ghost" disabled={busy} onClick={reset}>Empezar de nuevo</button>
+            {rotatedCount > 0 && <span className="hint">{rotatedCount} página(s) giradas</span>}
           </div>
         </>
       )}
 
       {stage === 'result' && result && (
         <SingleResult
-          result={result} okTitle="Unido"
+          result={result} okTitle="Organizado"
           onDownload={() => downloadBlob(b64ToPdfBlob(result.content_b64), result.filename)}
           onBack={() => setStage('loaded')} onReset={reset}
         >

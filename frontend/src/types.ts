@@ -43,3 +43,5 @@ export interface MergeResult {
 export type Tool = 'dividir' | 'unir' | 'comprimir' | 'organizar'
 export type SplitMode = 'auto' | 'manual'
 export type Stage = 'empty' | 'loaded' | 'result'
+/** Tamaño de las miniaturas del tablero de páginas. */
+export type BoardSize = 'sm' | 'md' | 'lg'

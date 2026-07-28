@@ -29,9 +29,11 @@ export function getDoc(file: File): Promise<PDFDocumentProxy> {
   return p
 }
 
-async function paint(page: PDFPageProxy, canvas: HTMLCanvasElement, targetW: number) {
-  const scale = targetW / page.getViewport({ scale: 1 }).width
-  const viewport = page.getViewport({ scale })
+async function paint(page: PDFPageProxy, canvas: HTMLCanvasElement, targetW: number, rotation = 0) {
+  // `rotation` se suma a la que ya trae la página en el PDF, igual que hace el
+  // backend al escribir /Rotate — así la miniatura muestra el resultado real.
+  const base = page.getViewport({ scale: 1, rotation: page.rotate + rotation })
+  const viewport = page.getViewport({ scale: targetW / base.width, rotation: page.rotate + rotation })
   const ctx = canvas.getContext('2d')
   if (!ctx) return
   canvas.width = viewport.width
@@ -39,11 +41,13 @@ async function paint(page: PDFPageProxy, canvas: HTMLCanvasElement, targetW: num
   await page.render({ canvas, canvasContext: ctx, viewport }).promise
 }
 
-/* Renderiza la página `pageNumber` de un File ya abierto. */
-export async function renderPage(file: File, pageNumber: number, canvas: HTMLCanvasElement, targetW = 180) {
+/* Renderiza la página `pageNumber` de un File ya abierto, con giro opcional. */
+export async function renderPage(
+  file: File, pageNumber: number, canvas: HTMLCanvasElement, targetW = 180, rotation = 0,
+) {
   const doc = await getDoc(file)
   const page = await doc.getPage(pageNumber)
-  await paint(page, canvas, targetW)
+  await paint(page, canvas, targetW, rotation)
 }
 
 /* Renderiza la primera página desde bytes (para las tarjetas de resultado). */

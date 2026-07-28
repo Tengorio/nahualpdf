@@ -16,3 +16,14 @@ export function evenRanges(numPages: number, n: number): string[] {
 
 export const errMsg = (e: unknown, fallback: string) =>
   e instanceof Error ? e.message : fallback
+
+/**
+ * Tamaño legible a partir de MB. Un expediente de 4 KB mostrado como "0.00 MB"
+ * no le dice nada a nadie, así que por debajo de 1 MB se reporta en KB.
+ */
+export function formatSize(mb: number): string {
+  if (mb >= 1) return `${mb.toFixed(2)} MB`
+  const kb = mb * 1024
+  if (kb >= 1) return `${Math.round(kb)} KB`
+  return `${Math.max(1, Math.round(kb * 1024))} B`
+}

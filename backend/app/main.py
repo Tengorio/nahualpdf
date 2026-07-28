@@ -244,21 +244,41 @@ async def merge(
     )
 
 
-@app.post("/api/merge/pages", response_model=MergeResult)
-async def merge_pages_endpoint(
-    files: list[UploadFile] = File(...),
-    sequence: str = Form(...),  # JSON: [[fileIndex, pageNumber], ...] en el orden deseado
-    max_size_mb: float = Form(0.0),  # 0 = no comprimir
-    dpi: int = Form(150),
-    quality: int = Form(80),
-    preserve_text: bool = Form(True),
-) -> MergeResult:
+def _parse_sequence(sequence: str) -> list[tuple[int, int, int]]:
+    """
+    Parsea el JSON del tablero de miniaturas: [[archivo, página], ...] o
+    [[archivo, página, rotación], ...]. La rotación es opcional y en grados.
+    """
     try:
-        seq_raw = json.loads(sequence)
-        seq: list[tuple[int, int]] = [(int(a), int(b)) for a, b in seq_raw]
-    except (json.JSONDecodeError, ValueError, TypeError):
-        raise HTTPException(status_code=400, detail="`sequence` debe ser [[archivo, página], ...].")
+        raw = json.loads(sequence)
+        parsed: list[tuple[int, int, int]] = []
+        for entry in raw:
+            file_idx, page_no = int(entry[0]), int(entry[1])
+            rotation = int(entry[2]) if len(entry) > 2 else 0
+            parsed.append((file_idx, page_no, rotation))
+        return parsed
+    except (json.JSONDecodeError, ValueError, TypeError, IndexError):
+        raise HTTPException(
+            status_code=400,
+            detail="`sequence` debe ser [[archivo, página] o [archivo, página, rotación], ...].",
+        )
 
+
+async def _build_from_pages(
+    files: list[UploadFile],
+    sequence: str,
+    max_size_mb: float,
+    dpi: int,
+    quality: int,
+    preserve_text: bool,
+    suffix: str,
+    fallback_name: str,
+) -> MergeResult:
+    """Núcleo compartido por /api/merge/pages y /api/organize."""
+    if not files:
+        raise HTTPException(status_code=400, detail="Sube al menos un PDF.")
+
+    seq = _parse_sequence(sequence)
     data = [await _read_pdf(f) for f in files]
     names = [f.filename or f"documento_{i + 1}.pdf" for i, f in enumerate(files)]
 
@@ -271,7 +291,12 @@ async def merge_pages_endpoint(
         raise HTTPException(status_code=400, detail=str(e))
 
     key = pdf_ops.find_common_project_key(names)
-    base = f"{key}_DC" if key else "documento_unido"
+    if key:
+        base = f"{key}{suffix}"
+    elif len(names) == 1:
+        base = f"{os.path.splitext(names[0])[0]}{suffix}"
+    else:
+        base = fallback_name
     return MergeResult(
         filename=f"{base}.pdf",
         num_pages=res["num_pages"],
@@ -279,4 +304,38 @@ async def merge_pages_endpoint(
         compressed=res["compressed"],
         oversized=res["oversized"],
         content_b64=base64.b64encode(res["bytes"]).decode("ascii"),
+    )
+
+
+@app.post("/api/merge/pages", response_model=MergeResult)
+async def merge_pages_endpoint(
+    files: list[UploadFile] = File(...),
+    sequence: str = Form(...),  # JSON: [[fileIndex, pageNumber, rotation?], ...] en orden
+    max_size_mb: float = Form(0.0),  # 0 = no comprimir
+    dpi: int = Form(150),
+    quality: int = Form(80),
+    preserve_text: bool = Form(True),
+) -> MergeResult:
+    return await _build_from_pages(
+        files, sequence, max_size_mb, dpi, quality, preserve_text,
+        suffix="_DC", fallback_name="documento_unido",
+    )
+
+
+@app.post("/api/organize", response_model=MergeResult)
+async def organize(
+    files: list[UploadFile] = File(...),
+    sequence: str = Form(...),  # JSON: [[fileIndex, pageNumber, rotation?], ...] en orden
+    max_size_mb: float = Form(0.0),  # 0 = no comprimir
+    dpi: int = Form(150),
+    quality: int = Form(80),
+    preserve_text: bool = Form(True),
+) -> MergeResult:
+    """
+    Reordena / gira / elimina páginas y devuelve el documento reconstruido.
+    Comparte motor con la unión por páginas; cambia el nombre de salida.
+    """
+    return await _build_from_pages(
+        files, sequence, max_size_mb, dpi, quality, preserve_text,
+        suffix="_organizado", fallback_name="documento_organizado",
     )

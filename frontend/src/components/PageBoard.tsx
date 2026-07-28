@@ -7,6 +7,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Ic } from '../icons'
+import type { BoardSize } from '../types'
 import { PageThumb } from './PageThumb'
 
 export interface PageItem {
@@ -15,17 +16,20 @@ export interface PageItem {
   file: File
   page: number
   included: boolean
+  rotation: number // 0 | 90 | 180 | 270, se suma a la que ya trae el PDF
   sourceLabel: string
   colorIdx: number
 }
 
 export function PageBoard({
-  items, onReorder, onToggle, onRemove,
+  items, onReorder, onToggle, onRemove, onRotate, size = 'md',
 }: {
   items: PageItem[]
   onReorder: (items: PageItem[]) => void
   onToggle: (id: string) => void
   onRemove: (id: string) => void
+  onRotate?: (id: string) => void
+  size?: BoardSize
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -48,11 +52,11 @@ export function PageBoard({
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
       <SortableContext items={items.map((i) => i.id)} strategy={rectSortingStrategy}>
-        <div className="pageboard">
+        <div className={`pageboard sz-${size}`}>
           {items.map((it) => (
             <SortableCard
               key={it.id} item={it} orderNo={order.get(it.id)}
-              onToggle={onToggle} onRemove={onRemove}
+              onToggle={onToggle} onRemove={onRemove} onRotate={onRotate}
             />
           ))}
         </div>
@@ -62,12 +66,13 @@ export function PageBoard({
 }
 
 function SortableCard({
-  item, orderNo, onToggle, onRemove,
+  item, orderNo, onToggle, onRemove, onRotate,
 }: {
   item: PageItem
   orderNo?: number
   onToggle: (id: string) => void
   onRemove: (id: string) => void
+  onRotate?: (id: string) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
   const style = {
@@ -84,25 +89,39 @@ function SortableCard({
       className={`pcard c${item.colorIdx % 6}${item.included ? '' : ' excluded'}${isDragging ? ' dragging' : ''}`}
       {...attributes} {...listeners}
       onKeyDown={(e) => {
-        // Enter/Espacio los usa dnd-kit para levantar/soltar; solo interceptamos Supr.
+        // Enter/Espacio los usa dnd-kit para levantar/soltar; el resto es nuestro.
         if (e.key === 'Delete') { e.preventDefault(); onRemove(item.id) }
+        if ((e.key === 'r' || e.key === 'R') && onRotate) { e.preventDefault(); onRotate(item.id) }
       }}
-      aria-label={`${item.sourceLabel}, página ${item.page}${item.included ? `, posición ${orderNo}` : ', excluida'}`}
+      aria-label={
+        `${item.sourceLabel}, página ${item.page}` +
+        (item.rotation ? `, girada ${item.rotation} grados` : '') +
+        (item.included ? `, posición ${orderNo}` : ', excluida')
+      }
     >
       <div className="pcard-top">
         <span className="ord tnum">{item.included ? orderNo : '—'}</span>
         <div className="pcard-btns">
+          {onRotate && (
+            <button className="iconbtn" title="Girar 90° (tecla R)"
+              onPointerDown={stop} onClick={(e) => { stop(e); onRotate(item.id) }}>
+              {Ic.rotate}
+            </button>
+          )}
           <button className="iconbtn" title={item.included ? 'Excluir página' : 'Incluir página'}
             onPointerDown={stop} onClick={(e) => { stop(e); onToggle(item.id) }}>
             {item.included ? Ic.check : Ic.plus}
           </button>
-          <button className="iconbtn danger" title="Quitar página"
+          <button className="iconbtn danger" title="Quitar página (tecla Supr)"
             onPointerDown={stop} onClick={(e) => { stop(e); onRemove(item.id) }}>
             {Ic.trash}
           </button>
         </div>
       </div>
-      <PageThumb file={item.file} page={item.page} />
+      <div className="thumbwrap">
+        <PageThumb file={item.file} page={item.page} rotation={item.rotation} />
+        {item.rotation !== 0 && <span className="rotbadge tnum">{item.rotation}°</span>}
+      </div>
       <div className="pcard-foot">
         <span className="src" title={item.sourceLabel}>{item.sourceLabel}</span>
         <span className="pg mono tnum">p.{item.page}</span>

@@ -5,12 +5,13 @@ import { useTheme } from './theme'
 import { DividirPanel } from './panels/DividirPanel'
 import { ComprimirPanel } from './panels/ComprimirPanel'
 import { UnirPanel } from './panels/UnirPanel'
+import { OrganizarPanel } from './panels/OrganizarPanel'
 
 const TOOLS: { id: Tool; name: string; sub: string }[] = [
   { id: 'dividir', name: 'Dividir', sub: 'Por tamaño o rangos' },
   { id: 'unir', name: 'Unir', sub: 'Combinar y comprimir' },
   { id: 'comprimir', name: 'Comprimir', sub: 'Reducir a un límite' },
-  { id: 'organizar', name: 'Organizar', sub: 'Reordenar y rotar' },
+  { id: 'organizar', name: 'Organizar', sub: 'Reordenar y girar' },
 ]
 
 export default function App() {
@@ -55,28 +56,11 @@ export default function App() {
         {tool === 'dividir' && <DividirPanel />}
         {tool === 'unir' && <UnirPanel />}
         {tool === 'comprimir' && <ComprimirPanel />}
-        {tool === 'organizar' && <OrganizarPlaceholder />}
+        {tool === 'organizar' && <OrganizarPanel />}
         <div className="footnote">
           miniPDF v2 — procesamiento 100% en el servidor local. Ningún archivo sale a internet.
         </div>
       </main>
     </div>
-  )
-}
-
-function OrganizarPlaceholder() {
-  return (
-    <section className="panel">
-      <div className="head">
-        <h1>Organizar páginas</h1>
-        <p>Reordena, rota o elimina páginas antes de guardar el expediente.</p>
-      </div>
-      <div className="card placeholder">
-        <div className="ring">{Ic.organizar}</div>
-        <h3>Vista de páginas para reordenar</h3>
-        <p>Arrastra las miniaturas para cambiar el orden, gíralas o quítalas. Ideal antes de unir o dividir.</p>
-        <span className="chip">Próximamente en v2</span>
-      </div>
-    </section>
   )
 }

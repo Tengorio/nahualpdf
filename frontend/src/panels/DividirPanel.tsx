@@ -2,7 +2,7 @@ import { useState } from 'react'
 import JSZip from 'jszip'
 import type { PdfInfo, Part, SplitMode, Stage } from '../types'
 import { b64ToPdfBlob, downloadBlob, fetchPdfInfo, splitAuto, splitManual } from '../api'
-import { evenRanges, errMsg } from '../util'
+import { evenRanges, errMsg, formatSize } from '../util'
 import { Ic } from '../icons'
 import { Dropzone, ErrorNote, Stepper } from '../components/common'
 import { PdfThumb } from '../components/PdfThumb'
@@ -94,7 +94,7 @@ export function DividirPanel() {
                 {info.project_key ? ` · clave ${info.project_key}` : ''}
               </div>
             </div>
-            <span className={`chip tnum ${info.size_mb > maxSize ? 'crit' : 'good'}`}>{info.size_mb.toFixed(2)} MB</span>
+            <span className={`chip tnum ${info.size_mb > maxSize ? 'crit' : 'good'}`}>{formatSize(info.size_mb)}</span>
           </div>
 
           <div className="controls">
@@ -195,8 +195,8 @@ export function DividirPanel() {
               <div className="card rcard" key={p.index}>
                 <PdfThumb b64={p.content_b64} label={`pág. ${p.range}`} />
                 <div className="rmeta">
-                  <div className="nm">{p.filename}<small>{p.compressed ? 'Comprimida' : 'Sin comprimir'}</small></div>
-                  <span className={`chip tnum ${p.oversized ? 'warn' : 'good'}`}>{p.size_mb.toFixed(2)} MB</span>
+                  <div className="nm" title={p.filename}>{p.filename}<small>{p.compressed ? 'Comprimida' : 'Sin comprimir'}</small></div>
+                  <span className={`chip tnum ${p.oversized ? 'warn' : 'good'}`}>{formatSize(p.size_mb)}</span>
                 </div>
                 <button className="btn btn-ghost" style={{ width: '100%' }}
                   onClick={() => p.content_b64 && downloadBlob(b64ToPdfBlob(p.content_b64), p.filename)}>

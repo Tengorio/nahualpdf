@@ -10,6 +10,13 @@ __pycache__/
 .venv/
 venv/
 
+# Pruebas (los PDF de prueba se regeneran con e2e/fixtures/generar_fixtures.py)
+.pytest_cache/
+frontend/test-results/
+frontend/playwright-report/
+frontend/e2e/capturas/
+frontend/e2e/fixtures/*.pdf
+
 # Sistema
 .DS_Store
 nohup.out

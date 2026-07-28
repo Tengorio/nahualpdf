@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { CompressResult, PdfInfo, Stage } from '../types'
 import { b64ToPdfBlob, compress, downloadBlob, fetchPdfInfo } from '../api'
-import { errMsg } from '../util'
+import { errMsg, formatSize } from '../util'
 import { Ic } from '../icons'
 import { Dropzone, ErrorNote, Stepper } from '../components/common'
 import { PdfThumb } from '../components/PdfThumb'
@@ -76,12 +76,12 @@ export function ComprimirPanel() {
                 {info.num_pages} páginas · {info.has_text ? 'texto seleccionable' : 'sin texto seleccionable'}
               </div>
             </div>
-            <span className={`chip tnum ${info.size_mb > maxSize ? 'crit' : 'good'}`}>{info.size_mb.toFixed(2)} MB</span>
+            <span className={`chip tnum ${info.size_mb > maxSize ? 'crit' : 'good'}`}>{formatSize(info.size_mb)}</span>
           </div>
 
           {info.size_mb <= maxSize && (
             <div className="note accent">{Ic.info}
-              El archivo ya pesa {info.size_mb.toFixed(2)} MB, dentro del objetivo de {maxSize} MB. Puedes bajar el objetivo o descargarlo tal cual.
+              El archivo ya pesa {formatSize(info.size_mb)}, dentro del objetivo de {maxSize} MB. Puedes bajar el objetivo o descargarlo tal cual.
             </div>
           )}
 
@@ -134,12 +134,12 @@ export function ComprimirPanel() {
             <div className="txt">
               <strong>
                 {result.oversized
-                  ? `Reducido a ${result.size_mb.toFixed(2)} MB — aún sobre el objetivo de ${maxSize} MB.`
-                  : `Listo — ${result.size_mb.toFixed(2)} MB, dentro de ${maxSize} MB.`}
+                  ? `Reducido a ${formatSize(result.size_mb)} — aún sobre el objetivo de ${maxSize} MB.`
+                  : `Listo — ${formatSize(result.size_mb)}, dentro de ${maxSize} MB.`}
               </strong>
               <p>
                 {result.compressed
-                  ? `De ${result.original_size_mb.toFixed(2)} MB a ${result.size_mb.toFixed(2)} MB (−${pct.toFixed(0)}%).`
+                  ? `De ${formatSize(result.original_size_mb)} a ${formatSize(result.size_mb)} (−${pct.toFixed(0)}%).`
                   : 'No necesitó compresión.'}
                 {result.oversized ? ' Preservando el texto no se pudo bajar más; prueba desactivar “preservar texto” o subir el objetivo.' : ''}
               </p>
@@ -153,8 +153,8 @@ export function ComprimirPanel() {
             <div className="card rcard">
               <PdfThumb b64={result.content_b64} label={result.compressed ? 'Comprimido' : 'Original'} />
               <div className="rmeta">
-                <div className="nm">{result.filename}<small>{result.compressed ? `−${pct.toFixed(0)}% de tamaño` : 'Sin cambios'}</small></div>
-                <span className={`chip tnum ${result.oversized ? 'warn' : 'good'}`}>{result.size_mb.toFixed(2)} MB</span>
+                <div className="nm" title={result.filename}>{result.filename}<small>{result.compressed ? `−${pct.toFixed(0)}% de tamaño` : 'Sin cambios'}</small></div>
+                <span className={`chip tnum ${result.oversized ? 'warn' : 'good'}`}>{formatSize(result.size_mb)}</span>
               </div>
               <button className="btn btn-ghost" style={{ width: '100%' }}
                 onClick={() => downloadBlob(b64ToPdfBlob(result.content_b64), result.filename)}>
