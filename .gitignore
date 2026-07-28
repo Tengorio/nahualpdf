@@ -24,3 +24,6 @@ nohup.out
 
 # Registro del servicio
 deploy/*.log
+
+# Heredado del Streamlit original (ver legacy/)
+.old_versions

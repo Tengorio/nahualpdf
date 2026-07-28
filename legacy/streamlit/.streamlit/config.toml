@@ -1,0 +1,19 @@
+[client]
+showSidebarNavigation = false
+showErrorDetails = true
+
+[server]
+headless = true
+port = 7772 # <========= revisar puerto
+enableCORS = false
+enableWebsocketCompression = true
+fileWatcherType = "watchdog"
+baseUrlPath = "/minipdf"
+address = "0.0.0.0"
+runOnSave = true
+
+[theme]
+primaryColor = "#4CAF50"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F0F5"
+textColor = "#262730"
