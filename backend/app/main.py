@@ -73,6 +73,7 @@ class MergeResult(BaseModel):
     compressed: bool
     oversized: bool
     content_b64: str
+    blank_pages: int = 0  # hojas en blanco agregadas para imprimir a doble cara
 
 
 # --------------------------------------------------------------------------- #
@@ -209,6 +210,7 @@ async def merge(
     dpi: int = Form(150),
     quality: int = Form(80),
     preserve_text: bool = Form(True),
+    pad_for_duplex: bool = Form(False),  # unir para imprimir a doble cara
 ) -> MergeResult:
     if len(files) < 1:
         raise HTTPException(status_code=400, detail="Sube al menos un PDF para unir.")
@@ -230,7 +232,8 @@ async def merge(
     limit = max_size_mb if max_size_mb and max_size_mb > 0 else None
     try:
         res = pdf_ops.merge_documents(
-            documents, max_size_mb=limit, dpi=dpi, quality=quality, preserve_text=preserve_text
+            documents, max_size_mb=limit, dpi=dpi, quality=quality,
+            preserve_text=preserve_text, pad_for_duplex=pad_for_duplex,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -243,6 +246,7 @@ async def merge(
         size_mb=res["size_mb"],
         compressed=res["compressed"],
         oversized=res["oversized"],
+        blank_pages=res.get("blank_pages", 0),
         content_b64=base64.b64encode(res["bytes"]).decode("ascii"),
     )
 
@@ -276,6 +280,7 @@ async def _build_from_pages(
     preserve_text: bool,
     suffix: str,
     fallback_name: str,
+    pad_for_duplex: bool = False,
 ) -> MergeResult:
     """Núcleo compartido por /api/merge/pages y /api/organize."""
     if not files:
@@ -288,7 +293,8 @@ async def _build_from_pages(
     limit = max_size_mb if max_size_mb and max_size_mb > 0 else None
     try:
         res = pdf_ops.merge_pages(
-            data, seq, max_size_mb=limit, dpi=dpi, quality=quality, preserve_text=preserve_text
+            data, seq, max_size_mb=limit, dpi=dpi, quality=quality,
+            preserve_text=preserve_text, pad_for_duplex=pad_for_duplex,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -306,6 +312,7 @@ async def _build_from_pages(
         size_mb=res["size_mb"],
         compressed=res["compressed"],
         oversized=res["oversized"],
+        blank_pages=res.get("blank_pages", 0),
         content_b64=base64.b64encode(res["bytes"]).decode("ascii"),
     )
 
@@ -318,10 +325,11 @@ async def merge_pages_endpoint(
     dpi: int = Form(150),
     quality: int = Form(80),
     preserve_text: bool = Form(True),
+    pad_for_duplex: bool = Form(False),  # unir para imprimir a doble cara
 ) -> MergeResult:
     return await _build_from_pages(
         files, sequence, max_size_mb, dpi, quality, preserve_text,
-        suffix="_DC", fallback_name="documento_unido",
+        suffix="_DC", fallback_name="documento_unido", pad_for_duplex=pad_for_duplex,
     )
 
 

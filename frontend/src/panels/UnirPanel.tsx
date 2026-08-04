@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { MergeResult, Stage } from '../types'
 import { b64ToPdfBlob, downloadBlob, mergePages } from '../api'
 import { errMsg, formatSize } from '../util'
-import { toSequence, usePageBoard } from '../usePageBoard'
+import { countDuplexBlanks, toSequence, usePageBoard } from '../usePageBoard'
 import { Dropzone, ErrorNote, SingleResult, SizeLimitControl, Stepper } from '../components/common'
 import { PdfThumb } from '../components/PdfThumb'
 import { PageBoard } from '../components/PageBoard'
@@ -13,6 +13,7 @@ export function UnirPanel() {
   const board = usePageBoard()
   const [stage, setStage] = useState<Stage>('empty')
   const [doCompress, setDoCompress] = useState(false)
+  const [padForDuplex, setPadForDuplex] = useState(false)
   const [maxSize, setMaxSize] = useState(1)
   const [result, setResult] = useState<MergeResult | null>(null)
   const [busy, setBusy] = useState(false)
@@ -28,7 +29,10 @@ export function UnirPanel() {
     if (sequence.length === 0) { setError('Selecciona al menos una página.'); return }
     setBusy(true); setError(null)
     try {
-      const res = await mergePages(board.files, sequence, { maxSizeMb: doCompress ? maxSize : 0 })
+      const res = await mergePages(board.files, sequence, {
+        maxSizeMb: doCompress ? maxSize : 0,
+        padForDuplex,
+      })
       setResult(res); setStage('result')
     } catch (e) {
       setError(errMsg(e, 'Falló la unión.'))
@@ -40,6 +44,7 @@ export function UnirPanel() {
   const reset = () => { board.clear(); setStage('empty'); setResult(null); setError(null) }
 
   const includedCount = board.items.filter((it) => it.included).length
+  const blanksPreview = countDuplexBlanks(toSequence(board.items))
   const stepN = stage === 'empty' ? 1 : stage === 'loaded' ? 2 : 3
   const shownError = error ?? board.loadError
 
@@ -79,6 +84,21 @@ export function UnirPanel() {
             onRotate={board.rotate}
           />
 
+          <div className="card ctl" style={{ marginTop: 18 }}>
+            <label className="rowflex" style={{ cursor: 'pointer', fontSize: 13 }}>
+              <input type="checkbox" checked={padForDuplex}
+                onChange={(e) => setPadForDuplex(e.target.checked)} />
+              Unir para imprimir (doble cara)
+            </label>
+            <div className="hint" style={{ marginTop: 10 }}>
+              {padForDuplex
+                ? blanksPreview > 0
+                  ? `${blanksPreview === 1 ? 'Se agregará 1 hoja en blanco' : `Se agregarán ${blanksPreview} hojas en blanco`}: los documentos con páginas impares la llevan al final para que el siguiente empiece en hoja nueva.`
+                  : 'Todos los documentos tienen páginas pares: no hace falta ninguna hoja en blanco.'
+                : 'Agrega una hoja en blanco al final de cada documento con páginas impares, para que al imprimir a doble cara no queden dos documentos en la misma hoja.'}
+            </div>
+          </div>
+
           <SizeLimitControl
             enabled={doCompress} setEnabled={setDoCompress}
             value={maxSize} setValue={setMaxSize}
@@ -104,7 +124,7 @@ export function UnirPanel() {
             <div className="card rcard">
               <PdfThumb b64={result.content_b64} label={`${result.num_pages} pág.`} />
               <div className="rmeta">
-                <div className="nm" title={result.filename}>{result.filename}<small>{result.compressed ? 'Comprimido' : 'Sin comprimir'}</small></div>
+                <div className="nm" title={result.filename}>{result.filename}<small>{result.compressed ? 'Comprimido' : 'Sin comprimir'}{result.blank_pages ? ` · ${result.blank_pages} ${result.blank_pages === 1 ? 'hoja en blanco' : 'hojas en blanco'} para doble cara` : ''}</small></div>
                 <span className={`chip tnum ${result.oversized ? 'warn' : 'good'}`}>{formatSize(result.size_mb)}</span>
               </div>
               <button className="btn btn-ghost" style={{ width: '100%' }}

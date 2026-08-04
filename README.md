@@ -54,6 +54,9 @@ Vite redirige `/api` → `localhost:8000`, así que basta abrir
 - [x] **Comprimir** — a un tamaño objetivo, preservando texto opcionalmente
 - [x] **Unir** — tablero visual de miniaturas: arrastra páginas para reordenar
       (mouse o teclado, vía @dnd-kit), gíralas, quita las que no van, compresión opcional
+- [x] **Unir para imprimir** — casilla de doble cara: cada documento con páginas
+      impares recibe una hoja en blanco al final, para que al imprimir dúplex no
+      queden dos documentos en la misma hoja de papel
 - [x] **Organizar** — mismo tablero sobre uno o varios documentos: reordenar,
       girar (90° por clic o tecla `R`) y eliminar páginas antes de guardar
 - [x] Acciones sobre todo el tablero: incluir/excluir todas, invertir orden,

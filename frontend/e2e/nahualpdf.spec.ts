@@ -166,6 +166,20 @@ test.describe('Unir', () => {
     expect(await page.locator('.pcard .ord').allTextContents()).toEqual(['1', '2', '3', '4'])
   })
 
+  test('unir para imprimir agrega una hoja en blanco tras el documento impar', async ({ page }) => {
+    await abrir(page, 'Unir')
+    await subir(page, [ANEXO, INFORME]) // 3 páginas impares, luego 4 pares
+
+    const ctl = page.locator('.card.ctl').filter({ hasText: 'Unir para imprimir' })
+    await expect(ctl).toContainText('no queden dos documentos en la misma hoja')
+    await ctl.getByRole('checkbox').check()
+    await expect(ctl).toContainText('Se agregará 1 hoja en blanco')
+
+    await page.getByRole('button', { name: /Unir 7 página/ }).click()
+    await expect(page.locator('.banner')).toContainText('8 páginas', { timeout: 60_000 })
+    await expect(page.locator('.rmeta')).toContainText('1 hoja en blanco')
+  })
+
   test('invertir el orden reordena el tablero', async ({ page }) => {
     await abrir(page, 'Unir')
     await subir(page, INFORME)

@@ -38,6 +38,8 @@ export interface MergeResult {
   compressed: boolean
   oversized: boolean
   content_b64: string
+  /** Hojas en blanco agregadas al unir para imprimir a doble cara. */
+  blank_pages?: number
 }
 
 export type Tool = 'dividir' | 'unir' | 'comprimir' | 'organizar'

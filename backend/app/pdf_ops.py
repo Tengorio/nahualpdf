@@ -64,14 +64,43 @@ def extract_pages(pdf_bytes: bytes, page_range: str) -> bytes:
     return out.getvalue()
 
 
-def merge_pdfs(pdf_bytes_list: list[bytes]) -> bytes:
+def add_blank_like(writer: PdfWriter, page) -> None:
+    """
+    Agrega al writer una hoja en blanco del mismo tamaño *impreso* que `page`.
+    Si la página viene girada 90/270, el ancho y el alto se intercambian para
+    que la hoja en blanco salga con la misma orientación en el papel.
+    """
+    box = page.mediabox
+    width, height = float(box.width), float(box.height)
+    if int(page.get("/Rotate", 0) or 0) % 360 in (90, 270):
+        width, height = height, width
+    writer.add_blank_page(width=width, height=height)
+
+
+def merge_pdfs(pdf_bytes_list: list[bytes], pad_for_duplex: bool = False) -> tuple[bytes, int]:
+    """
+    Une los PDF en uno y devuelve (bytes, hojas_en_blanco_agregadas).
+
+    Con `pad_for_duplex`, cada documento con un número impar de páginas recibe
+    una hoja en blanco al final, para que al imprimir a doble cara el siguiente
+    documento empiece siempre en una hoja nueva. El último documento no se
+    rellena: no hay nada después que pueda caer en su reverso.
+    """
     writer = PdfWriter()
-    for pdf_bytes in pdf_bytes_list:
-        for page in PdfReader(BytesIO(pdf_bytes)).pages:
+    blanks = 0
+    for i, pdf_bytes in enumerate(pdf_bytes_list):
+        pages = PdfReader(BytesIO(pdf_bytes)).pages
+        last = None
+        for page in pages:
             writer.add_page(page)
+            last = page
+        is_last_doc = i == len(pdf_bytes_list) - 1
+        if pad_for_duplex and last is not None and len(pages) % 2 == 1 and not is_last_doc:
+            add_blank_like(writer, last)
+            blanks += 1
     out = BytesIO()
     writer.write(out)
-    return out.getvalue()
+    return out.getvalue(), blanks
 
 
 def detect_text_content(pdf_bytes: bytes) -> tuple[bool, float]:
@@ -366,11 +395,14 @@ def merge_documents(
     dpi: int = 150,
     quality: int = 80,
     preserve_text: bool = True,
+    pad_for_duplex: bool = False,
 ) -> dict:
     """
     Une varios documentos en uno. `documents` es una lista de (pdf_bytes, rango);
     rango vacío = todas las páginas. Si max_size_mb se indica, comprime el
     resultado a ese objetivo. Lanza ValueError si algún rango no deja páginas.
+    Con `pad_for_duplex` se rellena con hojas en blanco para imprimir a doble
+    cara sin que dos documentos compartan hoja (ver `merge_pdfs`).
     """
     extracted: list[bytes] = []
     for pdf_bytes, page_range in documents:
@@ -383,7 +415,7 @@ def merge_documents(
             raise ValueError(f"El rango '{page_range}' no selecciona ninguna página.")
         extracted.append(chunk)
 
-    combined = merge_pdfs(extracted)
+    combined, blank_pages = merge_pdfs(extracted, pad_for_duplex=pad_for_duplex)
     num_pages = count_pages(combined)
     size = get_file_size_mb(combined)
     compressed = False
@@ -397,7 +429,8 @@ def merge_documents(
         )
 
     return {"bytes": combined, "size_mb": round(size, 3), "num_pages": num_pages,
-            "compressed": compressed, "oversized": oversized, "attempts": attempts}
+            "compressed": compressed, "oversized": oversized, "attempts": attempts,
+            "blank_pages": blank_pages}
 
 
 def merge_pages(
@@ -407,6 +440,7 @@ def merge_pages(
     dpi: int = 150,
     quality: int = 80,
     preserve_text: bool = True,
+    pad_for_duplex: bool = False,
 ) -> dict:
     """
     Arma un PDF a partir de una secuencia ORDENADA de páginas. Cada elemento de
@@ -414,6 +448,11 @@ def merge_pages(
     girar esa página, (índice_de_archivo, página, rotación en grados). Permite
     tomar páginas sueltas de varios archivos en cualquier orden — es lo que
     alimenta el tablero visual de miniaturas. Ignora referencias fuera de rango.
+
+    Con `pad_for_duplex` se agrega una hoja en blanco al final de cada bloque
+    consecutivo de páginas del mismo archivo cuando ese bloque queda impar, para
+    que al imprimir a doble cara ningún documento comparta hoja con el
+    siguiente. El último bloque no se rellena.
     """
     readers = [PdfReader(BytesIO(b)) for b in files]
     # Rotación de origen de cada página, guardada antes de tocar nada: una misma
@@ -427,17 +466,30 @@ def merge_pages(
     }
 
     writer = PdfWriter()
+    blank_pages = 0
+    block_idx: int | None = None  # archivo del bloque abierto
+    block_count = 0               # páginas que lleva ese bloque
+    last_page = None              # última página agregada (molde de la hoja blanca)
+
     for entry in sequence:
         file_idx, page_no = entry[0], entry[1]
         rotation = entry[2] if len(entry) > 2 else 0
         if 0 <= file_idx < len(readers):
             reader = readers[file_idx]
             if 1 <= page_no <= len(reader.pages):
+                if file_idx != block_idx:
+                    if (pad_for_duplex and block_idx is not None
+                            and block_count % 2 == 1 and last_page is not None):
+                        add_blank_like(writer, last_page)
+                        blank_pages += 1
+                    block_idx, block_count = file_idx, 0
                 page = reader.pages[page_no - 1]
                 page[NameObject("/Rotate")] = NumberObject(
                     (base_rotations[(file_idx, page_no)] + rotation) % 360
                 )
                 writer.add_page(page)
+                last_page = page
+                block_count += 1
 
     num_pages = len(writer.pages)
     if num_pages == 0:
@@ -455,4 +507,4 @@ def merge_pages(
         combined, size, compressed, oversized = res["bytes"], res["size_mb"], True, res["oversized"]
 
     return {"bytes": combined, "size_mb": round(size, 3), "num_pages": num_pages,
-            "compressed": compressed, "oversized": oversized}
+            "compressed": compressed, "oversized": oversized, "blank_pages": blank_pages}

@@ -165,6 +165,80 @@ def test_merge_comprime_si_se_pide_limite(client, heavy_pdf):
 
 
 # --------------------------------------------------------------------------- #
+# Unir para imprimir (doble cara)
+# --------------------------------------------------------------------------- #
+def test_duplex_rellena_documentos_impares(client):
+    """3 páginas de A + 2 de B + 1 de C: A recibe hoja en blanco, B y C no."""
+    a, b, c = make_text_pdf(3, "AAA"), make_text_pdf(2, "BBB"), make_text_pdf(1, "CCC")
+    r = client.post(
+        "/api/merge/pages",
+        files=uploads([a, b, c], ["a.pdf", "b.pdf", "c.pdf"]),
+        data={
+            "sequence": "[[0,1],[0,2],[0,3],[1,1],[1,2],[2,1]]",
+            "pad_for_duplex": "true",
+        },
+    )
+    assert r.status_code == 200
+    data = r.json()
+    assert data["blank_pages"] == 1
+    assert data["num_pages"] == 7
+    texts = [(p.extract_text() or "").strip() for p in pdf_of(data["content_b64"]).pages]
+    assert texts[3] == "", "la hoja en blanco va justo después del documento impar"
+    assert "BBB" in texts[4]
+    assert "CCC" in texts[6], "el último documento impar no se rellena"
+
+
+def test_duplex_desactivado_no_agrega_nada(client):
+    a, b = make_text_pdf(3, "AAA"), make_text_pdf(3, "BBB")
+    r = client.post(
+        "/api/merge/pages",
+        files=uploads([a, b], ["a.pdf", "b.pdf"]),
+        data={"sequence": "[[0,1],[0,2],[0,3],[1,1],[1,2],[1,3]]"},
+    )
+    data = r.json()
+    assert data["blank_pages"] == 0
+    assert data["num_pages"] == 6
+
+
+def test_duplex_hoja_en_blanco_conserva_el_tamano(client):
+    a, b = make_text_pdf(1, "AAA"), make_text_pdf(1, "BBB")
+    r = client.post(
+        "/api/merge/pages",
+        files=uploads([a, b], ["a.pdf", "b.pdf"]),
+        data={"sequence": "[[0,1],[1,1]]", "pad_for_duplex": "true"},
+    )
+    pages = pdf_of(r.json()["content_b64"]).pages
+    assert r.json()["blank_pages"] == 1
+    assert pages[1].mediabox.width == pages[0].mediabox.width
+    assert pages[1].mediabox.height == pages[0].mediabox.height
+
+
+def test_duplex_en_merge_por_documentos(client):
+    a, b = make_text_pdf(3, "AAA"), make_text_pdf(4, "BBB")
+    r = client.post(
+        "/api/merge",
+        files=uploads([a, b], ["a.pdf", "b.pdf"]),
+        data={"pad_for_duplex": "true"},
+    )
+    data = r.json()
+    assert data["blank_pages"] == 1
+    assert data["num_pages"] == 8
+
+
+def test_duplex_respeta_rangos_por_documento(client):
+    """Con rangos, lo que cuenta es lo que queda seleccionado de cada documento."""
+    a, b = make_text_pdf(6, "AAA"), make_text_pdf(6, "BBB")
+    r = client.post(
+        "/api/merge",
+        files=uploads([a, b], ["a.pdf", "b.pdf"]),
+        data={"ranges": '["1-5", "1-2"]', "pad_for_duplex": "true"},
+    )
+    data = r.json()
+    assert data["blank_pages"] == 1
+    assert data["num_pages"] == 8
+
+
+# --------------------------------------------------------------------------- #
 # Organizar (reordenar + rotar)
 # --------------------------------------------------------------------------- #
 def test_organize_aplica_rotacion(client, text_pdf):

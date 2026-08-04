@@ -9,6 +9,27 @@ export function toSequence(items: PageItem[]): [number, number, number][] {
 }
 
 /**
+ * Cuántas hojas en blanco agregaría "unir para imprimir": una por cada bloque
+ * consecutivo de páginas del mismo archivo que quede impar, sin contar el
+ * último bloque (nada cae en su reverso). Debe coincidir con `merge_pages` del
+ * backend — aquí solo sirve para anticipárselo al usuario.
+ */
+export function countDuplexBlanks(sequence: [number, number, number][]): number {
+  let blanks = 0
+  let blockIdx: number | null = null
+  let blockCount = 0
+  for (const [fileIndex] of sequence) {
+    if (fileIndex !== blockIdx) {
+      if (blockIdx !== null && blockCount % 2 === 1) blanks++
+      blockIdx = fileIndex
+      blockCount = 0
+    }
+    blockCount++
+  }
+  return blanks
+}
+
+/**
  * Estado compartido del tablero de páginas (lo usan Unir y Organizar):
  * carga los PDF, expande cada uno en sus páginas y expone las operaciones
  * de la tarjeta (incluir/excluir, girar, quitar, reordenar).

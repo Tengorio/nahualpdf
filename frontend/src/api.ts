@@ -54,6 +54,8 @@ export async function splitManual(
 
 export interface MergeParams extends Partial<SplitParams> {
   maxSizeMb?: number // 0 / omitido = no comprimir
+  /** Unir para imprimir: hoja en blanco tras cada documento de páginas impares. */
+  padForDuplex?: boolean
 }
 
 export async function compress(file: File, p: SplitParams): Promise<CompressResult> {
@@ -78,6 +80,7 @@ export async function merge(
   form.append('dpi', String(p.dpi ?? 150))
   form.append('quality', String(p.quality ?? 80))
   form.append('preserve_text', String(p.preserveText ?? true))
+  form.append('pad_for_duplex', String(p.padForDuplex ?? false))
   return handle<MergeResult>(await fetch('/api/merge', { method: 'POST', body: form }))
 }
 
@@ -101,6 +104,7 @@ export async function mergePages(
   p: MergeParams,
 ): Promise<MergeResult> {
   const body = pageSequenceForm(files, sequence, p)
+  body.append('pad_for_duplex', String(p.padForDuplex ?? false))
   return handle<MergeResult>(await fetch('/api/merge/pages', { method: 'POST', body }))
 }
 
