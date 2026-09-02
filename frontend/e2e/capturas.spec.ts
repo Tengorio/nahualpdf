@@ -21,6 +21,7 @@ async function tema(page: Page, modo: 'light' | 'dark') {
 }
 
 async function abrir(page: Page, herramienta: string) {
+  await page.goto('/')
   await page.locator('.toolbtn').filter({ hasText: new RegExp(`^${herramienta}`) }).click()
 }
 
@@ -29,31 +30,31 @@ for (const modo of ['light', 'dark'] as const) {
     await page.setViewportSize({ width: 1440, height: 1000 })
     await tema(page, modo)
 
-    for (const tool of ['Dividir', 'Unir', 'Comprimir', 'Organizar']) {
+    for (const tool of ['Reorganizar', 'Dividir', 'Comprimir']) {
       await abrir(page, tool)
       await page.screenshot({ path: path.join(OUT, `${modo}-${tool.toLowerCase()}-inicio.png`) })
     }
 
-    // Tablero de Organizar con páginas cargadas y un giro aplicado.
-    await abrir(page, 'Organizar')
+    // Tablero de Reorganizar con páginas cargadas y un giro aplicado.
+    await abrir(page, 'Reorganizar')
     await page.locator('.drop input[type=file]').setInputFiles([INFORME, ANEXO])
     await page.locator('.pcard').first().waitFor()
     await page.locator('.pcard').first().getByTitle(/Girar 90/).click()
     await page.waitForTimeout(700)
-    await page.screenshot({ path: path.join(OUT, `${modo}-organizar-tablero.png`), fullPage: true })
+    await page.screenshot({ path: path.join(OUT, `${modo}-reorganizar-tablero.png`), fullPage: true })
 
-    // Resultado de organizar.
+    // Resultado de reorganizar.
     await page.getByRole('button', { name: /Guardar \d+ página/ }).click()
     await page.locator('.banner').waitFor({ timeout: 60_000 })
     await page.waitForTimeout(900)
-    await page.screenshot({ path: path.join(OUT, `${modo}-organizar-resultado.png`), fullPage: true })
+    await page.screenshot({ path: path.join(OUT, `${modo}-reorganizar-resultado.png`), fullPage: true })
 
-    // Tablero pequeño en Unir (densidad máxima).
-    await abrir(page, 'Unir')
+    // Tablero pequeño en Reorganizar (densidad máxima).
+    await abrir(page, 'Reorganizar')
     await page.locator('.drop input[type=file]').setInputFiles([INFORME, ANEXO])
     await page.locator('.pcard').first().waitFor()
     await page.getByRole('button', { name: 'S', exact: true }).click()
     await page.waitForTimeout(700)
-    await page.screenshot({ path: path.join(OUT, `${modo}-unir-tablero-sm.png`), fullPage: true })
+    await page.screenshot({ path: path.join(OUT, `${modo}-reorganizar-tablero-sm.png`), fullPage: true })
   })
 }

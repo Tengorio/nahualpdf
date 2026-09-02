@@ -14,8 +14,45 @@ export function evenRanges(numPages: number, n: number): string[] {
   return out
 }
 
-export const errMsg = (e: unknown, fallback: string) =>
-  e instanceof Error ? e.message : fallback
+/**
+ * Convierte un error capturado en un mensaje amigable y claro en español.
+ * Traduce errores de transporte de red (Failed to fetch, cortes de conexión)
+ * y códigos de estado HTTP a explicaciones comprensibles y accionables.
+ */
+export function errMsg(e: unknown, fallback: string): string {
+  if (e instanceof Error) {
+    const msg = e.message.trim()
+    const lower = msg.toLowerCase()
+
+    if (
+      lower.includes('failed to fetch') ||
+      lower.includes('networkerror') ||
+      lower.includes('load failed') ||
+      lower.includes('network request failed')
+    ) {
+      return 'No se pudo conectar con el servidor local o se interrumpió la transferencia. Comprueba tu conexión de red e intenta subir el archivo de nuevo.'
+    }
+
+    if (lower.includes('aborterror') || lower.includes('aborted')) {
+      return 'La operación fue cancelada o tardó demasiado tiempo en responder.'
+    }
+
+    if (msg.startsWith('Error 413')) {
+      return 'El archivo es demasiado grande para transferirse en una sola petición.'
+    }
+
+    if (msg.startsWith('Error 502') || msg.startsWith('Error 503') || msg.startsWith('Error 504')) {
+      return 'El servicio de NahualPDF no está respondiendo en este momento. Intenta de nuevo en unos segundos.'
+    }
+
+    if (msg.startsWith('Error 500')) {
+      return 'Ocurrió un error en el servidor al procesar el archivo. Verifica que el PDF no esté dañado.'
+    }
+
+    if (msg) return msg
+  }
+  return fallback
+}
 
 /**
  * Tamaño legible a partir de MB. Un expediente de 4 KB mostrado como "0.00 MB"

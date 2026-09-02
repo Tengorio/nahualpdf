@@ -2,34 +2,36 @@ import { useState } from 'react'
 import type { Tool } from './types'
 import { Ic } from './icons'
 import { useTheme } from './theme'
+import { ReorganizarPanel } from './panels/ReorganizarPanel'
 import { DividirPanel } from './panels/DividirPanel'
 import { ComprimirPanel } from './panels/ComprimirPanel'
-import { UnirPanel } from './panels/UnirPanel'
-import { OrganizarPanel } from './panels/OrganizarPanel'
 
 const TOOLS: { id: Tool; name: string; sub: string }[] = [
-  { id: 'dividir', name: 'Dividir', sub: 'Por tamaño o rangos' },
-  { id: 'unir', name: 'Unir', sub: 'Combinar y comprimir' },
+  { id: 'reorganizar', name: 'Reorganizar o unir', sub: 'Combinar, ordenar y girar' },
+  { id: 'dividir', name: 'Dividir', sub: 'Para Hacienda o por rangos' },
   { id: 'comprimir', name: 'Comprimir', sub: 'Reducir a un límite' },
-  { id: 'organizar', name: 'Organizar', sub: 'Reordenar y girar' },
 ]
 
 export default function App() {
-  const [tool, setTool] = useState<Tool>('dividir')
+  const [tool, setTool] = useState<Tool>('reorganizar')
   const [theme, toggleTheme] = useTheme()
 
   return (
     <div className="app">
       <div className="brand">
-        <div className="glyph">n</div>
+        <div className="glyph">{Ic.logo}</div>
         <div>
-          <div className="word">Nahual<b>PDF</b></div>
+          <div className="word">
+            Nahual<b>PDF</b>
+          </div>
           <div className="sub">Transforma expedientes y documentos</div>
         </div>
       </div>
 
       <div className="topbar">
-        <span className="trust">{Ic.lock} Red local de Secihti · los archivos nunca salen a internet</span>
+        <span className="trust">
+          {Ic.lock} Red local de Secihti · los archivos nunca salen a internet
+        </span>
         <button
           className="themebtn"
           onClick={toggleTheme}
@@ -43,9 +45,16 @@ export default function App() {
       <nav className="rail">
         <div className="cap">Herramientas</div>
         {TOOLS.map((t) => (
-          <button key={t.id} className={`toolbtn${tool === t.id ? ' active' : ''}`} onClick={() => setTool(t.id)}>
+          <button
+            key={t.id}
+            className={`toolbtn${tool === t.id ? ' active' : ''}`}
+            onClick={() => setTool(t.id)}
+          >
             <span className="ic">{Ic[t.id]}</span>
-            <span className="lbl">{t.name}<small>{t.sub}</small></span>
+            <span className="lbl">
+              {t.name}
+              <small>{t.sub}</small>
+            </span>
           </button>
         ))}
         <div className="spacer" />
@@ -53,10 +62,9 @@ export default function App() {
       </nav>
 
       <main className="main">
+        {(tool === 'reorganizar' || tool === 'unir' || tool === 'organizar') && <ReorganizarPanel />}
         {tool === 'dividir' && <DividirPanel />}
-        {tool === 'unir' && <UnirPanel />}
         {tool === 'comprimir' && <ComprimirPanel />}
-        {tool === 'organizar' && <OrganizarPanel />}
         <div className="footnote">
           NahualPDF — procesamiento 100% en el servidor local. Ningún archivo sale a internet.
         </div>

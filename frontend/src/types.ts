@@ -42,7 +42,7 @@ export interface MergeResult {
   blank_pages?: number
 }
 
-export type Tool = 'dividir' | 'unir' | 'comprimir' | 'organizar'
+export type Tool = 'reorganizar' | 'dividir' | 'comprimir' | 'unir' | 'organizar'
 export type SplitMode = 'auto' | 'manual'
 export type Stage = 'empty' | 'loaded' | 'result'
 /** Tamaño de las miniaturas del tablero de páginas. */
