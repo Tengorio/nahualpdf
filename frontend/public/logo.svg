@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+     stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+     role="img" aria-label="NahualPDF — Tepeyollotl, el corazón de la montaña">
+  <!-- Tepeyollotl, «corazón de la montaña»: el mismo disco del espejo, pero
+       latiendo dentro del cerro. Es el nahual de Tezcatlipoca — la misma
+       deidad en su otra forma, que es justo lo que hace esta app. -->
+  <path d="M2.4 19.6h19.2L14.8 7.4l-3 5-2.9-4.4z"/>
+  <circle cx="12" cy="15.7" r="3.1"/>
+  <circle cx="12" cy="15.7" r="1.15"/>
+</svg>

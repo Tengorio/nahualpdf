@@ -2,6 +2,16 @@ import type { ReactNode } from 'react'
 
 /* Set de iconos inline (stroke = currentColor, heredan color del contexto). */
 export const Ic: Record<string, ReactNode> = {
+  /* Marca: Tepeyollotl, «corazón de la montaña» — el nahual de Tezcatlipoca,
+     la misma deidad en su otra forma. Es el mismo disco del espejo de la app
+     hermana, pero latiendo dentro del cerro. Ver DESIGN.md §3. */
+  logo: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+         strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2.4 19.6h19.2L14.8 7.4l-3 5-2.9-4.4z" />
+      <circle cx="12" cy="15.7" r="3.1" /><circle cx="12" cy="15.7" r="1.15" />
+    </svg>
+  ),
   dividir: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M6 3v6M6 15v6M18 3v6M18 15v6" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="12" r="3" /><path d="M9 12h6" />
@@ -15,6 +25,12 @@ export const Ic: Record<string, ReactNode> = {
   comprimir: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4" /><path d="M8 12h8" />
+    </svg>
+  ),
+  reorganizar: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" /><path d="M14 17h7M17.5 13.5v7" />
     </svg>
   ),
   organizar: (
