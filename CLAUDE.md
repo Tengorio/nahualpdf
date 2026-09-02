@@ -70,6 +70,68 @@ descarga navegadores. Los PDF de prueba no se versionan: se regeneran con
 `npx playwright test e2e/capturas.spec.ts` deja capturas en claro y oscuro en
 `frontend/e2e/capturas/`.
 
+> **Estado al 2026-09-01: 21 de 21 en verde**, ya con la identidad gráfica nueva
+> aplicada. No existe script `npm run test:e2e`: los `package.json` solo traen
+> `dev`, `build`, `lint` y `preview`, así que el comando es `npx playwright test`
+> dentro de `frontend/`.
+
+## Identidad gráfica — decidida el 2026-09-01, NO revertir
+
+La apariencia de esta app **cambió a propósito** el 2026-09-01. Si algo se ve
+distinto a como lo recuerdas, no es un accidente ni una regresión.
+
+**La fuente de verdad es `~/japt/identidad_grafica_interfaces/DESIGN.md`.** Si un
+color del CSS y ese archivo no coinciden, manda el archivo y el CSS es el que
+está mal. Ahí están los tokens, los componentes, los estados y el porqué de cada
+decisión; el material visual está en `IDENTIDAD.html` de esa misma carpeta.
+
+### Qué cambió y por qué
+
+- **El glifo de la marca ya no es la letra `n`**: es Tepeyollotl, «corazón de la
+  montaña» —el nahual de Tezcatlipoca, la misma deidad en su otra forma, que es
+  justo lo que hace esta app—. Vive en `src/icons.tsx` como `Ic.logo`.
+- **El favicon se reemplazó.** El anterior (`public/favicon.svg`) era un logotipo
+  morado de plantilla que no era nuestro y salía en la pestaña de todos.
+
+- **Los tokens de color se reemplazaron** en `src/index.css`. El acento dejó de
+  ser el teal `#0F766E` que esta app compartía con su hermana: las dos usaban
+  literalmente el mismo tema —el encabezado del CSS de Tezcatlipoca hasta decía
+  «NahualPDF»— y eran indistinguibles en dos pestañas.
+- **El semáforo (`--good`/`--warn`/`--crit`) es idéntico en las dos apps** y no
+  se toca: un error debe verse igual en ambas. Lo único que las distingue es el
+  acento de marca.
+- **Tres tokens cambiaron por accesibilidad, no por gusto**, y no hay que
+  «devolverlos» a como se veían: `--warn` claro daba 4.37:1 sobre su propio
+  lavado, `--ink-3` daba 3.1:1 y se usa para subtítulos (que son texto), y el
+  nuevo `--line-strong` existe porque los bordes de `input` y `.btn-ghost` daban
+  1.5:1 contra el mínimo de 3:1 de WCAG 1.4.11.
+- **Se eliminó el bloque `@media (prefers-color-scheme: dark)`.** Era una de tres
+  copias del tema en el mismo archivo, y hacía que la app parpadeara en oscuro
+  antes de que React estampara `data-theme` en cualquier equipo con el sistema en
+  oscuro. El predeterminado es **claro**, a propósito. Hoy el tema se define en
+  dos selectores: `:root` y `:root[data-theme="dark"]`.
+- **El foco visible es obligatorio** (`:focus-visible` global en `index.css`).
+  La app se usa con teclado; no eliminar el outline.
+
+### El icono de la pestaña lleva versión
+
+`index.html` declara tres iconos (`favicon.ico`, `favicon.svg`,
+`apple-touch-icon.png`) **con `?v=2`**, y `public/` tiene además `favicon-32.png`
+e `icon-512.png`. El sufijo no es decorativo: el navegador cachea el favicon con
+mucha agresividad —y cachea también la ausencia— así que sin él un icono nuevo
+no se ve aunque el archivo ya esté en el servidor. **Si cambias el icono, sube la
+versión** en los tres `<link>`.
+
+### Lo que parece un descuido y no lo es
+
+`.card` lleva `border-top-left-radius: var(--radius-fold)` — la esquina superior
+izquierda más redondeada que las otras tres. Es **la hoja doblada**, el rasgo de
+marca de NahualPDF.
+
+Ese renglón es lo que permite distinguir las dos apps **sin depender del
+color** — sobrevive al gris, a la impresión y al daltonismo. Está comentado en el
+CSS. No quitarlo.
+
 ## Convenciones
 
 - Commits: `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`.
@@ -100,6 +162,16 @@ NahualPDF (2026-07-28): *nahual*, el que cambia de forma.
 
 La versión Streamlit está archivada en `legacy/streamlit/` y su historia
 completa vive en este repo desde el primer commit de 2025.
+
+## Relación con los repos vecinos
+
+- **`~/japt/tezcatlipoca/`** (:8001) — lectura de documentos y extracción por
+  plantillas. Misma arquitectura e identidad visual; heredó de aquí `theme.ts`,
+  `index.css` y el patrón de paneles.
+- **`~/japt/yaca/`** (:8002) — separa el PDF engrapado de las CLC y nombra cada
+  pedazo con su proyecto. Nació el 2026-08-10 del mismo modo (era miniCLC) y
+  también heredó de aquí el tema, `components/common.tsx` y el criterio de la
+  capa pura de `app/pdf_ops.py`. Vale la pena mantener la familia.
 
 ## Relación con el repo de ministración
 
