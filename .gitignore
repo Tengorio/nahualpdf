@@ -27,3 +27,6 @@ deploy/*.log
 
 # Heredado del Streamlit original (ver legacy/)
 .old_versions
+
+# Buzón de reportes de usuarios (documentos reales): nunca al repo, como feedback/ de Tezcatlipoca
+incidencias/
