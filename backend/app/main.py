@@ -17,7 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import pdf_ops
+from . import hacienda, pdf_ops
 
 app = FastAPI(title="NahualPDF API", version="2.0.0")
 
@@ -349,6 +349,66 @@ async def organize(
     return await _build_from_pages(
         files, sequence, max_size_mb, dpi, quality, preserve_text,
         suffix="_organizado", fallback_name="documento_organizado",
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Preparar para Hacienda (D-09): un botón, partes de <= 1 MB sin quitar nada
+# --------------------------------------------------------------------------- #
+class HaciendaParte(BaseModel):
+    nombre: str
+    paginas: str
+    size_mb: float
+    content_b64: str
+
+
+class HaciendaResult(BaseModel):
+    archivo: str
+    num_pages: int
+    original_size_mb: float
+    partes: list[HaciendaParte]
+    accion: str
+    parecido_minimo: float | None = None
+    tinta_perdida_maxima: float | None = None
+    texto_identico: bool | None = None
+    advertencias: list[str] = []
+    receta_nombre: str
+    receta_texto: str
+
+
+@app.post("/api/hacienda", response_model=HaciendaResult)
+def preparar_hacienda(file: UploadFile = File(...)) -> HaciendaResult:
+    """
+    Síncrono a propósito: FastAPI lo corre en un hilo aparte, así un CAR de
+    20 MB (medio minuto) no congela la app para los demás usuarios.
+    """
+    data = file.file.read()
+    if not data[:5] == b"%PDF-":
+        raise HTTPException(status_code=400, detail="El archivo no es un PDF válido.")
+    nombre = file.filename or "documento.pdf"
+    try:
+        res = hacienda.preparar(data, nombre)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    r = res.receta
+    return HaciendaResult(
+        archivo=nombre,
+        num_pages=r["paginas"],
+        original_size_mb=round(len(data) / (1024 * 1024), 3),
+        partes=[
+            HaciendaParte(
+                nombre=p["nombre"], paginas=p["paginas"], size_mb=round(p["tam"] / (1024 * 1024), 3),
+                content_b64=base64.b64encode(p["bytes"]).decode("ascii"),
+            )
+            for p in res.partes
+        ],
+        accion=r["accion"],
+        parecido_minimo=r.get("parecido_minimo"),
+        tinta_perdida_maxima=r.get("tinta_perdida_maxima"),
+        texto_identico=r.get("texto_identico"),
+        advertencias=res.advertencias,
+        receta_nombre=f"{hacienda.nombre_base(nombre)}_receta.txt",
+        receta_texto=res.receta_texto,
     )
 
 

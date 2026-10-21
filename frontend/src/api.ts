@@ -1,4 +1,4 @@
-import type { CompressResult, MergeResult, PdfInfo, SplitResult } from './types'
+import type { CompressResult, HaciendaResult, MergeResult, PdfInfo, SplitResult } from './types'
 
 async function handle<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -116,6 +116,13 @@ export async function organize(
 ): Promise<MergeResult> {
   const body = pageSequenceForm(files, sequence, p)
   return handle<MergeResult>(await fetch('/api/organize', { method: 'POST', body }))
+}
+
+/** Preparar para Hacienda: partes de <= 1 MB sin quitar nada, con su receta. */
+export async function prepararHacienda(file: File): Promise<HaciendaResult> {
+  const form = new FormData()
+  form.append('file', file)
+  return handle<HaciendaResult>(await fetch('/api/hacienda', { method: 'POST', body: form }))
 }
 
 /** base64 (de la API) -> Uint8Array. */

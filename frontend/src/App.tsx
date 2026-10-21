@@ -5,9 +5,11 @@ import { useTheme } from './theme'
 import { ReorganizarPanel } from './panels/ReorganizarPanel'
 import { DividirPanel } from './panels/DividirPanel'
 import { ComprimirPanel } from './panels/ComprimirPanel'
+import { HaciendaPanel } from './panels/HaciendaPanel'
 
 const TOOLS: { id: Tool; name: string; sub: string }[] = [
   { id: 'reorganizar', name: 'Reorganizar o unir', sub: 'Combinar, ordenar y girar' },
+  { id: 'hacienda', name: 'Preparar para Hacienda', sub: 'Un botón: partes de 1 MB' },
   { id: 'dividir', name: 'Dividir', sub: 'Para Hacienda o por rangos' },
   { id: 'comprimir', name: 'Comprimir', sub: 'Reducir a un límite' },
 ]
@@ -63,6 +65,7 @@ export default function App() {
 
       <main className="main">
         {(tool === 'reorganizar' || tool === 'unir' || tool === 'organizar') && <ReorganizarPanel />}
+        {tool === 'hacienda' && <HaciendaPanel />}
         {tool === 'dividir' && <DividirPanel />}
         {tool === 'comprimir' && <ComprimirPanel />}
         <div className="footnote">

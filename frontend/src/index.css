@@ -341,3 +341,9 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(
   .rail .cap, .rail .spacer, .rail .themehint { display: none; }
   .topbar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 12px 20px; }
 }
+
+/* Preparar para Hacienda: la receta de cada documento */
+.receta { margin: 10px 0 0; padding: 10px 12px; font-family: var(--mono); font-size: 12px; line-height: 1.5;
+  white-space: pre-wrap; word-break: break-word; background: var(--surface-2); border-radius: var(--radius-sm);
+  color: var(--ink-2); }
+.hacienda-item { align-items: flex-start; margin-bottom: 0; }

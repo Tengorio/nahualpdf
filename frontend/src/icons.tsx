@@ -12,6 +12,13 @@ export const Ic: Record<string, ReactNode> = {
       <circle cx="12" cy="15.7" r="3.1" /><circle cx="12" cy="15.7" r="1.15" />
     </svg>
   ),
+  hacienda: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+         strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z" />
+      <path d="M14 3v5h5" /><path d="m8.5 14.5 2.3 2.3 4.7-4.8" />
+    </svg>
+  ),
   dividir: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M6 3v6M6 15v6M18 3v6M18 15v6" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="12" r="3" /><path d="M9 12h6" />

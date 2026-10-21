@@ -42,7 +42,29 @@ export interface MergeResult {
   blank_pages?: number
 }
 
-export type Tool = 'reorganizar' | 'dividir' | 'comprimir' | 'unir' | 'organizar'
+export interface HaciendaParte {
+  nombre: string
+  paginas: string
+  size_mb: number
+  content_b64: string
+}
+
+/** Resultado de «Preparar para Hacienda» (D-09) para un documento. */
+export interface HaciendaResult {
+  archivo: string
+  num_pages: number
+  original_size_mb: number
+  partes: HaciendaParte[]
+  accion: string
+  parecido_minimo: number | null
+  tinta_perdida_maxima: number | null
+  texto_identico: boolean | null
+  advertencias: string[]
+  receta_nombre: string
+  receta_texto: string
+}
+
+export type Tool = 'hacienda' | 'reorganizar' | 'dividir' | 'comprimir' | 'unir' | 'organizar'
 export type SplitMode = 'auto' | 'manual'
 export type Stage = 'empty' | 'loaded' | 'result'
 /** Tamaño de las miniaturas del tablero de páginas. */
