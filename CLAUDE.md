@@ -26,7 +26,8 @@ Lo usan varias áreas de Secihti, no solo ministración.
 ```
 nahualpdf/
 ├─ backend/          FastAPI · toda la lógica de PDF en app/pdf_ops.py
-│  └─ tests/         18 pruebas de la API (pytest)
+│  ├─ app/hacienda.py  «Preparar para Hacienda» (D-09): partes de ≤ 1 MB sin quitar nada
+│  └─ tests/         pruebas de la API (pytest)
 ├─ frontend/         React + Vite + TypeScript
 │  ├─ src/panels/    una herramienta por panel
 │  ├─ src/components/  tablero de páginas, miniaturas, comunes

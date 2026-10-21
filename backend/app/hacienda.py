@@ -20,6 +20,7 @@ que `pdf_ops`.
 """
 from __future__ import annotations
 
+import hashlib
 import io
 import math
 import os
@@ -33,6 +34,9 @@ import pikepdf
 from PIL import Image
 
 VERSION_MOTOR = "hacienda-1.0 (2026-10-21)"
+# Huella del código que corre: dos recetas con la misma versión y distinta huella
+# salieron de motores distintos (p. ej. una copia de prueba que no se reinició).
+HUELLA = hashlib.sha256(open(__file__, "rb").read()).hexdigest()[:12]
 
 LIMITE_MB = 1.0
 # Margen para que el archivo quepa también si el sistema cuenta 1 MB = 10^6.
@@ -455,6 +459,7 @@ def preparar(pdf_bytes: bytes, nombre_archivo: str = "documento.pdf",
         n_paginas = len(doc)
     receta: dict = {
         "motor": VERSION_MOTOR,
+        "huella": HUELLA,
         "archivo": nombre_archivo,
         "paginas": n_paginas,
         "bytes_original": len(pdf_bytes),
@@ -551,7 +556,7 @@ def _mb(n: int) -> str:
 def receta_en_texto(r: dict, advertencias: list[str]) -> str:
     """La receta para personas: qué se hizo y con qué garantía."""
     lin = [
-        f"Receta de NahualPDF · Preparar para Hacienda ({r['motor']})",
+        f"Receta de NahualPDF · Preparar para Hacienda ({r['motor']} · código {r['huella']})",
         f"Archivo: {r['archivo']} · {r['paginas']} páginas · {_mb(r['bytes_original'])}",
         f"Límite por parte: {_mb(r['limite_bytes'])}",
         f"Qué se hizo: {r['accion']}.",

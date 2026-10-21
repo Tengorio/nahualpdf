@@ -104,6 +104,15 @@ def test_si_ya_cabe_se_entrega_tal_cual():
     assert res.partes[0]["nombre"] == "chico.pdf"
 
 
+def test_receta_lleva_la_huella_del_codigo():
+    """La receta dice qué código la produjo, para distinguir motores con la misma versión."""
+    import hashlib
+    huella = hashlib.sha256(open(hacienda.__file__, "rb").read()).hexdigest()[:12]
+    res = hacienda.preparar(make_text_pdf(2), "chico.pdf")
+    assert res.receta["huella"] == huella
+    assert f"código {huella}" in res.receta_texto
+
+
 def test_escaneo_pesado_cabe_sin_perder_paginas():
     pdf = make_scan_pdf(12)
     assert len(pdf) > 3 * hacienda.LIMITE_BYTES

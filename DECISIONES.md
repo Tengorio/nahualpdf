@@ -4,6 +4,7 @@ La más reciente arriba. Reconstruido el 2026-10-15 desde `CLAUDE.md`, `README.m
 
 | ID | Fecha | Decisión | Por qué |
 |---|---|---|---|
+| D-09 | 2026-10-21 | «Preparar para Hacienda»: un botón que deja cada PDF en partes de ≤ 1,000,000 bytes **sin quitar nada**. Solo re-codifica imágenes (copias repetidas guardadas una vez; ≤ 200 dpi, piso 150; blanco y negro G4 si no borra más de 2 % de la tinta, si no gris JPEG con SSIM ≥ 0.97) y divide en las menos partes contiguas; cada documento sale con su receta (huella del código, parecido y tinta por página, texto idéntico). Motor en `app/hacienda.py` | Javier: comprimir y pasar a gris o blanco y negro sí, quitar logos, sellos o firmas no; idealmente ≤ 5 partes. Los modos Hacienda de Dividir y Comprimir no daban archivos legibles con los CAR escaneados (caso CBF-2026, 25 CAR) |
 | D-08 | 2026-09-01 | Identidad gráfica propia (Tepeyollotl, acento distinto al de Tezcatlipoca, esquina de «hoja doblada» en `.card`), tokens de `~/japt/identidad_grafica_interfaces/DESIGN.md`. **No revertir** | Las dos apps eran indistinguibles en dos pestañas; la esquina distingue sin depender del color |
 | D-07 | 2026-09-01 | Tema claro por omisión, sin `prefers-color-scheme`; foco visible obligatorio; tres tokens ajustados por contraste WCAG | El bloque automático hacía parpadear la app; se usa con teclado |
 | D-06 | 2026-09-01 | Los iconos del navegador llevan versión (`?v=2`) | El navegador cachea el favicon y su ausencia |

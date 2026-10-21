@@ -12,6 +12,18 @@ NahualPDF divide, une, comprime y reorganiza PDF, como iLovePDF, pero dentro de 
 4. **Para imprimir a doble cara**, marca la casilla: cada documento con número impar de páginas recibe una hoja en blanco al final, para que dos documentos no queden en la misma hoja de papel.
 5. Si quieres, comprime el resultado. Descarga.
 
+## Preparar para Hacienda (un botón)
+
+1. Suelta uno o varios PDF (por ejemplo, todos los CAR de una vez). Empiezan solos, uno tras otro.
+2. Cada documento sale en archivos de **menos de 1 MB**. Si cabe en uno, sale con su mismo nombre; si no, en partes
+   `_parte1de2`, `_parte2de2`… en orden de páginas, en las menos partes posibles.
+3. **No se quita nada:** el texto, los logos, los sellos y las firmas se quedan. Solo las imágenes pasan a gris o a
+   blanco y negro.
+4. Descarga cada parte o todo en un `.zip`. «Ver receta» explica qué se le hizo a cada documento.
+5. Si salen más de 5 partes, aparece un aviso: ese documento no se puede bajar más sin quitarle contenido.
+
+Para subir a Hacienda conviene esta pestaña antes que los modos Hacienda de Dividir o Comprimir.
+
 ## Dividir
 
 - **Dividir para Hacienda (1 MB):** corta solo, en partes de hasta 1 MB, cuidando la calidad.
