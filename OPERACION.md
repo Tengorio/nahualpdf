@@ -1,5 +1,15 @@
 # OPERACIÓN — NahualPDF
 
+## Roles
+| Rol | Qué hace | Cómo entra |
+|---|---|---|
+| Usuario (áreas por confirmar) | Transforma expedientes y documentos PDF (incluido «Preparar para Hacienda») | Navegador en la red interna, sin cuenta (por confirmar) |
+| Usuario que reporta fallas | Avisa a Javier con el archivo, la pestaña y el mensaje | — |
+| Operador | `systemctl --user status nahualpdf`; reiniciar pide el sí de Javier | ssh `cb2` |
+| Administrador | Javier | ssh `cb2` |
+
+_Lo marcado «por confirmar» lo confirma Javier (F1, 2026-11-04)._
+
 Manual para quien opera el servicio en `seguimiento` (carpeta `~/japt/nahualpdf`). Escrito el 2026-10-15 a partir de `deploy/`, `README.md` y `CLAUDE.md`.
 
 ## Pieza en marcha
